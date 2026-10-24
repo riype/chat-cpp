@@ -1,0 +1,17 @@
+# Скомпилированные бинарники
+server
+client
+office
+test_appraiser
+test_compile
+
+# Объектные файлы
+*.o
+
+# Временные файлы
+*.swp
+*~
+
+# Файлы IDE (если появятся)
+.vscode/
+.idea/
