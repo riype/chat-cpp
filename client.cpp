@@ -28,18 +28,27 @@ cout<<"Подключено к серверу"<<endl;
 
 char buffer[1024];
 
-cout<<"Введите сообщение: ";
-cin.getline(buffer,1024);
+while(true){
+	cout<<"Введите сообщение: ";
+	cin.getline(buffer,1024);
 
-if (send(clientSocket, buffer, strlen(buffer), 0) == -1){
-	perror("send");
+	if(strcmp(buffer, "exit") == 0){
+		break;
 }
 
-memset(buffer,0,1024);
-int bytes = recv(clientSocket, buffer, 1024, 0);
+	if (send(clientSocket, buffer, strlen(buffer), 0) == -1){
+		perror("send");
+		break;
+}
 
-if (bytes>0){
+	memset(buffer,0,1024);
+	int bytes = recv(clientSocket, buffer, 1024, 0);
+	if (bytes <= 0){
+		break;
+}
 	cout<<"Ответ сервера: "<<buffer<<endl;
+
+
 }
 close(clientSocket);
 
