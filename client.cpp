@@ -4,7 +4,21 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <cstring>
+#include <thread>
 using namespace std;
+
+void recMessage(int clientSocket){
+while (true){
+	char buf[1024];
+	memset(buf,0,1024);
+	int bytes = recv(clientSocket, buf, 1024, 0);
+	if (bytes <= 0){
+		break;
+		}
+	buf[bytes] = '\0';
+	cout<<"Пришло: "<<buf<<endl;
+	}
+}
 
 int main() {
 
@@ -26,6 +40,8 @@ if (connect(clientSocket, (sockaddr*)&serverAddr, sizeof(serverAddr)) == -1) {
 }
 cout<<"Подключено к серверу"<<endl;
 
+thread t(recMessage, clientSocket);
+
 char buffer[1024];
 
 while(true){
@@ -41,15 +57,9 @@ while(true){
 		break;
 }
 
-	memset(buffer,0,1024);
-	int bytes = recv(clientSocket, buffer, 1024, 0);
-	if (bytes <= 0){
-		break;
 }
-	cout<<"Ответ сервера: "<<buffer<<endl;
-
-
-}
+shutdown(clientSocket,SHUT_RDWR);
+t.join();
 close(clientSocket);
 
 	return 0;
