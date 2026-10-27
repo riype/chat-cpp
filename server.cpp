@@ -4,7 +4,24 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <cstring>
+#include <thread>
 using namespace std;
+
+void handClient(int clientSocket){
+char buffer[1024];
+while (true){
+	int bytesReceived = recv(clientSocket, buffer, 1024, 0);
+        if (bytesReceived <= 0){
+                break;
+                }
+	buffer[bytesReceived] = '\0';
+	cout<<"Получено: "<<buffer<<endl;
+	send(clientSocket, buffer, bytesReceived, 0);
+
+	}
+close(clientSocket);
+cout<<"Клиент отключился"<<endl;
+}
 
 int main() {
 
@@ -31,32 +48,21 @@ if (listen(serverSocket, 5) == -1) {
     close(serverSocket);
     return 1;
 }
-cout << "Сервер слушает порт 8080. Ждёт подключения" << endl;
+cout << "Сервер слушает порт 8080" << endl;
 
-int clientSocket = accept(serverSocket, nullptr, nullptr);
-if (clientSocket == -1) {
-    perror("accept");
-    close(serverSocket);
-    return 1;
-}
-cout << "Клиент подключился" << endl;
-
-char buffer[1024];
 while (true) {
-    int bytesReceived = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
+    int clientSocket = accept(serverSocket, nullptr, nullptr);
 
-    if (bytesReceived <= 0) {
-        cout << "Клиент отключился" << endl;
-        break;
+    if (clientSocket == -1) {
+        perror("accept");
+        continue;
     }
+    cout << "Новый клиент подключился" << endl;
 
-    buffer[bytesReceived] = '\0';
-    cout << "Получено: " << buffer << endl;
-
-    send(clientSocket, buffer, bytesReceived, 0);
+    thread t(handClient, clientSocket);
+    t.detach();
 }
 
-close(clientSocket);
 close(serverSocket);
 
 	return 0;
