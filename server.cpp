@@ -5,7 +5,10 @@
 #include <unistd.h>
 #include <cstring>
 #include <thread>
+#include <vector>
 using namespace std;
+
+vector<int> clients;
 
 void handClient(int clientSocket){
 char buffer[1024];
@@ -14,13 +17,24 @@ while (true){
         if (bytesReceived <= 0){
                 break;
                 }
+
 	buffer[bytesReceived] = '\0';
 	cout<<"Получено: "<<buffer<<endl;
-	send(clientSocket, buffer, bytesReceived, 0);
+	for (int i = 0; i < clients.size(); i++){
+		send(clients[i], buffer, bytesReceived, 0);
+		}
 
 	}
 close(clientSocket);
 cout<<"Клиент отключился"<<endl;
+
+        for (int i = 0; i < clients.size(); i++) {
+        if (clients[i] == clientSocket) {
+                clients.erase(clients.begin() + i);
+                break;
+    }
+}
+
 }
 
 int main() {
@@ -58,6 +72,8 @@ while (true) {
         continue;
     }
     cout << "Новый клиент подключился" << endl;
+
+	clients.push_back(clientSocket);
 
     thread t(handClient, clientSocket);
     t.detach();

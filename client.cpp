@@ -45,7 +45,7 @@ thread t(recMessage, clientSocket);
 char buffer[1024];
 
 while(true){
-	cout<<"Введите сообщение: ";
+	cout<<"Введите сообщение: "<<endl;
 	cin.getline(buffer,1024);
 
 	if(strcmp(buffer, "exit") == 0){
