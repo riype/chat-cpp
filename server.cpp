@@ -6,9 +6,11 @@
 #include <cstring>
 #include <thread>
 #include <vector>
+#include <mutex>
 using namespace std;
 
 vector<int> clients;
+mutex clientMutex;
 
 void handClient(int clientSocket){
 char buffer[1024];
@@ -20,19 +22,25 @@ while (true){
 
 	buffer[bytesReceived] = '\0';
 	cout<<"Получено: "<<buffer<<endl;
+{
+	lock_guard<mutex> lock(clientMutex);
 	for (int i = 0; i < clients.size(); i++){
 		send(clients[i], buffer, bytesReceived, 0);
 		}
-
+}
 	}
 close(clientSocket);
 cout<<"Клиент отключился"<<endl;
 
+{
+	lock_guard<mutex> lock(clientMutex);
         for (int i = 0; i < clients.size(); i++) {
-        if (clients[i] == clientSocket) {
-                clients.erase(clients.begin() + i);
-                break;
+		if (clients[i] == clientSocket) {
+	                clients.erase(clients.begin() + i);
+	                break;
     }
+}
+
 }
 
 }
@@ -72,8 +80,10 @@ while (true) {
         continue;
     }
     cout << "Новый клиент подключился" << endl;
-
+{
+	lock_guard<mutex> lock(clientMutex);
 	clients.push_back(clientSocket);
+}
 
     thread t(handClient, clientSocket);
     t.detach();
