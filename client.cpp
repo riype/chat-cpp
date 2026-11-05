@@ -8,16 +8,25 @@
 using namespace std;
 
 void recMessage(int clientSocket){
-while (true){
-	char buf[1024];
-	memset(buf,0,1024);
-	int bytes = recv(clientSocket, buf, 1024, 0);
-	if (bytes <= 0){
-		break;
-		}
-	buf[bytes] = '\0';
-	cout<<"Пришло: "<<buf<<endl;
-	}
+    string currentMessage;
+    while (true){
+        char buf[1024];
+        memset(buf,0,1024);
+        int bytes = recv(clientSocket, buf, 1024, 0);
+        if (bytes <= 0){
+            break;
+        }
+
+        buf[bytes] = '\0';
+	currentMessage += buf;
+	size_t pos;
+        while ((pos = currentMessage.find('\n')) != string::npos) {
+            string fullMsg = currentMessage.substr(0, pos);
+            currentMessage.erase(0, pos + 1);
+
+            cout << "\r" << fullMsg << "\nВведите сообщение: " << flush;
+        }
+    }
 }
 
 int main() {
@@ -40,19 +49,26 @@ if (connect(clientSocket, (sockaddr*)&serverAddr, sizeof(serverAddr)) == -1) {
 }
 cout<<"Подключено к серверу"<<endl;
 
+char name[50];
+cout<<"Введите ваше имя: ";
+cin.getline(name, 50);
+
+string nameMsg = string(name) + "\n";
+send(clientSocket, nameMsg.c_str(), nameMsg.length(), 0);
+
 thread t(recMessage, clientSocket);
 
 char buffer[1024];
 
 while(true){
-	cout<<"Введите сообщение: "<<endl;
+	cout<<"Введите сообщение: "<<flush;
 	cin.getline(buffer,1024);
 
 	if(strcmp(buffer, "exit") == 0){
 		break;
 }
-
-	if (send(clientSocket, buffer, strlen(buffer), 0) == -1){
+string msg = string(buffer) + "\n";
+if (send(clientSocket, msg.c_str(), msg.length(), 0) == -1){
 		perror("send");
 		break;
 }
