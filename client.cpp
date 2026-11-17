@@ -39,7 +39,7 @@ if (clientSocket == -1) {
 sockaddr_in serverAddr;
 memset(&serverAddr, 0, sizeof(serverAddr));
 serverAddr.sin_family = AF_INET;
-serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+serverAddr.sin_addr.s_addr = inet_addr("192.168.0.13");
 serverAddr.sin_port = htons(8080);
 
 if (connect(clientSocket, (sockaddr*)&serverAddr, sizeof(serverAddr)) == -1) {
